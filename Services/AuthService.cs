@@ -1,7 +1,15 @@
 public class AuthService
 {
-    public string Test()
+    private readonly AppDbContext _context;
+    private readonly JwtService _jwt;
+
+    public AuthService(AppDbContext context, JwtService jwt)
     {
-        return "Auth working";
+        _context = context;
+        _jwt = jwt;
+    }
+    public AuthResponseDto Register(RegisterDto dto)
+    {
+        if
     }
 }
