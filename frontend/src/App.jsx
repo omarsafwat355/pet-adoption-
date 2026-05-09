@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -7,11 +8,32 @@ import Dashboard from './pages/Dashboard'
 import Favorites from './pages/Favorites'
 import PetDetails from './pages/PetDetails'
 import CreatePet from './pages/CreatePet'
+import AdoptedPets from './pages/AdoptedPets'
 import AdminDashboard from './pages/AdminDashboard'
 import ProtectedRoute from './routes/ProtectedRoute'
-import { ToastContainer } from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
+import * as signalR from '@microsoft/signalr'
 
 function App(){
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:7207/notificationHub")
+      .withAutomaticReconnect()
+      .build();
+
+    connection.start()
+      .then(() => console.log('SignalR Connected'))
+      .catch(err => console.error('SignalR Connection Error: ', err));
+
+    connection.on("ReceiveNotification", (message) => {
+      toast.info(`New Notification: ${message}`);
+    });
+
+    return () => {
+      connection.stop();
+    }
+  }, [])
   return(
     <BrowserRouter>
       <Navbar/>
@@ -31,6 +53,12 @@ function App(){
         <Route path='/favorites' element={
           <ProtectedRoute>
             <Favorites/>
+          </ProtectedRoute>
+        }/>
+
+        <Route path='/adopted' element={
+          <ProtectedRoute>
+            <AdoptedPets/>
           </ProtectedRoute>
         }/>
 

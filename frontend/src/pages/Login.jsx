@@ -1,17 +1,26 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import API from '../api/axios'
+import { AuthContext } from '../context/AuthContext'
 
 function Login(){
 
   const [email,setEmail] = useState('')
   const [password,setPassword] = useState('')
+  const { login } = useContext(AuthContext)
+  const navigate = useNavigate()
 
-  const handleSubmit = (e)=>{
+  const handleSubmit = async (e)=>{
     e.preventDefault()
-
-    localStorage.setItem('token','demo-token')
-
-    toast.success('Login Successful')
+    try {
+      const { data } = await API.post('/auth/login', { email, password })
+      login(data)
+      toast.success('Login Successful')
+      navigate('/')
+    } catch (error) {
+      toast.error(error.response?.data || 'Login Failed')
+    }
   }
 
   return(

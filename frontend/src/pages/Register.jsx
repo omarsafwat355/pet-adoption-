@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import API from '../api/axios'
 
 function Register(){
 
@@ -9,10 +11,18 @@ function Register(){
     password:'',
     role:'Adopter'
   })
+  
+  const navigate = useNavigate()
 
-  const handleSubmit = (e)=>{
+  const handleSubmit = async (e)=>{
     e.preventDefault()
-    toast.success('Registration Submitted')
+    try {
+      await API.post('/auth/register', form)
+      toast.success('Registration Submitted Successfully')
+      navigate('/login')
+    } catch (error) {
+      toast.error(error.response?.data || 'Registration Failed')
+    }
   }
 
   return(
@@ -46,8 +56,8 @@ function Register(){
                 className='form-select mb-3'
                 onChange={(e)=>setForm({...form,role:e.target.value})}
               >
-                <option>Adopter</option>
-                <option>Shelter</option>
+                <option value='Adopter'>Adopter</option>
+                <option value='PetOwner'>Shelter / Pet Owner</option>
               </select>
 
               <button className='btn btn-success w-100'>

@@ -1,19 +1,22 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[ApiController]
+[Route("api/[controller]")]
 public class ReviewController : ControllerBase
 {
     private readonly ReviewService _service;
-    public ReviewController(ReviewService _service)
+
+    public ReviewController(ReviewService service)
     {
         _service = service;
     }
-    [Authorize(Roles = "Admin")]
-    [HttpPost("add")]
+
+    [Authorize]
+    [HttpPost]
     public IActionResult Add(ReviewDto dto)
     {
         var id = int.Parse(User.FindFirst("UserId").Value);
-        return Ok(_service.Add(id , dto.Rating, dto.Comment));
+        return Ok(_service.Add(id, dto.PetId, dto.Rating, dto.Comment));
     }
-    
 }

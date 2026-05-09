@@ -1,4 +1,4 @@
-public class PetResponseDto
+public class PetUpdateDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -9,10 +9,4 @@ public class PetResponseDto
     public string HealthStatus { get; set; }
     public string Location { get; set; }
     public string Description { get; set; }
-    public string ImageUrl { get; set; }
-    public string Status { get; set; }
-    public int OwnerId { get; set; }
-    public string OwnerName { get; set; }
-    public int? ReviewRating { get; set; }
-    public string ReviewComment { get; set; }
 }
