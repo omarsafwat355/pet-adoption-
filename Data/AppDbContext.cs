@@ -10,4 +10,14 @@ public class AppDbContext : DbContext
     public DbSet<Favorite> Favorites { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Image> Images { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        {
+            relationship.DeleteBehavior = DeleteBehavior.Restrict;
+        }
+    }
 }

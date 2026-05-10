@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // 🗄️ Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("PetAdoptDb"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // 🔧 Services
 builder.Services.AddScoped<AuthService>();
@@ -72,10 +72,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed an Admin user
+// Seed an Admin user and apply migrations
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
     if (!db.Users.Any(u => u.Role == "Admin"))
     {
         db.Users.Add(new User
