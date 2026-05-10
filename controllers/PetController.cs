@@ -65,7 +65,8 @@ public class PetController : ControllerBase
             }
 
             var result = _Service.Create(dto, userId, imageUrl);
-            // Notify admin via SignalR
+            // Notify admin: new pet needs approval
+            await _hub.Clients.All.SendAsync("PetPending", $"New pet post submitted: {dto.Name}");
             await _hub.Clients.All.SendAsync("ReceiveNotification", $"New pet post submitted: {dto.Name}");
             return Ok(result);
         }
@@ -78,17 +79,31 @@ public class PetController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("approve")]
-    public IActionResult Approve([FromQuery] int id)
+    public async Task<IActionResult> Approve([FromQuery] int id)
     {
-        try { return Ok(_Service.ApprovePet(id)); }
+        try
+        {
+            var result = _Service.ApprovePet(id);
+            // Notify the owner their pet was approved
+            await _hub.Clients.All.SendAsync("PetApproved");
+            await _hub.Clients.All.SendAsync("ReceiveNotification", "A pet post has been approved!");
+            return Ok(result);
+        }
         catch (Exception e) { return BadRequest(e.Message); }
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost("reject")]
-    public IActionResult Reject([FromQuery] int id)
+    public async Task<IActionResult> Reject([FromQuery] int id)
     {
-        try { return Ok(_Service.RejectPet(id)); }
+        try
+        {
+            var result = _Service.RejectPet(id);
+            // Notify the owner their pet was rejected
+            await _hub.Clients.All.SendAsync("PetRejected");
+            await _hub.Clients.All.SendAsync("ReceiveNotification", "A pet post has been rejected.");
+            return Ok(result);
+        }
         catch (Exception e) { return BadRequest(e.Message); }
     }
 

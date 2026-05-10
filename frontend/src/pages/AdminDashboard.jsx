@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import API from '../api/axios'
+import { useSignalR } from '../context/SignalRContext'
 
 function AdminDashboard(){
   const [pendingPets, setPendingPets] = useState([])
   const [pendingUsers, setPendingUsers] = useState([])
+  const { subscribe } = useSignalR()
 
   useEffect(() => {
     fetchPending()
     fetchPendingUsers()
+
+    // Auto-refresh when a new pet is submitted by an owner
+    const unsubPet = subscribe('PetPending', () => {
+      toast.info('📋 A new pet post needs approval!')
+      fetchPending()
+    })
+    // Auto-refresh when a new user registers and needs approval
+    const unsubUser = subscribe('UserPending', () => {
+      toast.info('👤 A new shelter account needs approval!')
+      fetchPendingUsers()
+    })
+
+    return () => { unsubPet(); unsubUser() }
   }, [])
 
   const fetchPending = async () => {

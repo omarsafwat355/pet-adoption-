@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -12,29 +11,21 @@ import AdoptedPets from './pages/AdoptedPets'
 import AdminDashboard from './pages/AdminDashboard'
 import ProtectedRoute from './routes/ProtectedRoute'
 import { ToastContainer, toast } from 'react-toastify'
-import * as signalR from '@microsoft/signalr'
+import { SignalRProvider, useSignalR } from './context/SignalRContext'
+import { useEffect } from 'react'
 
-function App(){
+// Inner component so it can use useSignalR hook inside SignalRProvider
+function AppContent() {
+  const { subscribe } = useSignalR()
 
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7207/notificationHub")
-      .withAutomaticReconnect()
-      .build();
+    const unsub = subscribe('ReceiveNotification', (message) => {
+      toast.info(`🔔 ${message}`)
+    })
+    return unsub
+  }, [subscribe])
 
-    connection.start()
-      .then(() => console.log('SignalR Connected'))
-      .catch(err => console.error('SignalR Connection Error: ', err));
-
-    connection.on("ReceiveNotification", (message) => {
-      toast.info(`New Notification: ${message}`);
-    });
-
-    return () => {
-      connection.stop();
-    }
-  }, [])
-  return(
+  return (
     <BrowserRouter>
       <Navbar/>
 
@@ -77,6 +68,14 @@ function App(){
 
       <ToastContainer/>
     </BrowserRouter>
+  )
+}
+
+function App() {
+  return (
+    <SignalRProvider>
+      <AppContent/>
+    </SignalRProvider>
   )
 }
 

@@ -17,22 +17,37 @@ public class AdopationController : ControllerBase
 
     [Authorize(Roles = "Adopter")]
     [HttpPost("apply")]
-    public IActionResult Apply(AdoptionRequestDto dto)
+    public async Task<IActionResult> Apply(AdoptionRequestDto dto)
     {
         var id = int.Parse(User.FindFirst("UserId").Value);
         var result = _service.Apply(dto.PetId, id, dto.Message);
-        // Notify pet owner via SignalR
-        _hub.Clients.All.SendAsync("ReceiveNotification", "New adoption request received!");
+        // Notify pet owner: new adoption request arrived
+        await _hub.Clients.All.SendAsync("NewAdoptionRequest");
+        await _hub.Clients.All.SendAsync("ReceiveNotification", "New adoption request received!");
         return Ok(result);
     }
 
     [Authorize(Roles = "Admin,PetOwner")]
     [HttpPost("approve")]
-    public IActionResult Approve(int id) => Ok(_service.Approve(id));
+    public async Task<IActionResult> Approve([FromQuery] int id)
+    {
+        var result = _service.Approve(id);
+        // Notify adopter: their request was approved
+        await _hub.Clients.All.SendAsync("AdoptionStatusChanged");
+        await _hub.Clients.All.SendAsync("ReceiveNotification", "An adoption request has been approved!");
+        return Ok(result);
+    }
 
     [Authorize(Roles = "Admin,PetOwner")]
     [HttpPost("reject")]
-    public IActionResult Reject(int id) => Ok(_service.Reject(id));
+    public async Task<IActionResult> Reject([FromQuery] int id)
+    {
+        var result = _service.Reject(id);
+        // Notify adopter: their request was rejected
+        await _hub.Clients.All.SendAsync("AdoptionStatusChanged");
+        await _hub.Clients.All.SendAsync("ReceiveNotification", "An adoption request has been rejected.");
+        return Ok(result);
+    }
 
     [Authorize(Roles = "PetOwner")]
     [HttpGet("requests")]

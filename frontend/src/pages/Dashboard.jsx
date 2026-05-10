@@ -2,13 +2,37 @@ import { useState, useEffect } from 'react'
 import API from '../api/axios'
 import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
+import { useSignalR } from '../context/SignalRContext'
 
 function Dashboard(){
   const [pets, setPets] = useState([])
   const [requests, setRequests] = useState([])
 
+  const { subscribe } = useSignalR()
+
   useEffect(() => {
     fetchData()
+
+    // Auto-refresh when admin approves or rejects your pet post
+    const unsubApproved = subscribe('PetApproved', () => {
+      toast.success('✅ Your pet post was approved by the admin!')
+      fetchData()
+    })
+    const unsubRejected = subscribe('PetRejected', () => {
+      toast.error('❌ Your pet post was rejected by the admin.')
+      fetchData()
+    })
+    // Auto-refresh when an adopter applies for one of your pets
+    const unsubRequest = subscribe('NewAdoptionRequest', () => {
+      toast.info('📬 You have a new adoption request!')
+      fetchData()
+    })
+    // Auto-refresh when adoption status changes (approved/rejected by owner)
+    const unsubStatus = subscribe('AdoptionStatusChanged', () => {
+      fetchData()
+    })
+
+    return () => { unsubApproved(); unsubRejected(); unsubRequest(); unsubStatus() }
   }, [])
 
   const fetchData = async () => {
