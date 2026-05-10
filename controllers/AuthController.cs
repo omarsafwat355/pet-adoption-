@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("approve")]
-    public IActionResult ApproveUser(int id)
+    public IActionResult ApproveUser([FromQuery] int id)
     {
         try { return Ok(_auth.ApproveUser(id)); }
         catch (Exception e) { return BadRequest(e.Message); }
@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("reject")]
-    public IActionResult RejectUser(int id)
+    public IActionResult RejectUser([FromQuery] int id)
     {
         try { return Ok(_auth.RejectUser(id)); }
         catch (Exception e) { return BadRequest(e.Message); }

@@ -78,7 +78,7 @@ public class PetController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("approve")]
-    public IActionResult Approve(int id)
+    public IActionResult Approve([FromQuery] int id)
     {
         try { return Ok(_Service.ApprovePet(id)); }
         catch (Exception e) { return BadRequest(e.Message); }
@@ -86,7 +86,7 @@ public class PetController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPost("reject")]
-    public IActionResult Reject(int id)
+    public IActionResult Reject([FromQuery] int id)
     {
         try { return Ok(_Service.RejectPet(id)); }
         catch (Exception e) { return BadRequest(e.Message); }
