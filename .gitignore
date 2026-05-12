@@ -1,0 +1,24 @@
+## ASP.NET Core build outputs
+bin/
+obj/
+
+## SQLite database (runtime data, not source)
+*.db
+*.db-shm
+*.db-wal
+
+## User uploaded files (runtime content)
+wwwroot/uploads/
+
+## Frontend build output
+frontend/dist/
+frontend/node_modules/
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## IDE
+.vs/
+*.user
+.vscode/
